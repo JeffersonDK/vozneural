@@ -10,8 +10,8 @@ async def list_voices():
     voices = await edge_tts.list_voices()
     return voices
 
-async def generate_speech(text, voice, output_file, rate, pitch):
-    communicate = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch)
+async def generate_speech(text, voice, output_file):
+    communicate = edge_tts.Communicate(text, voice)
     await communicate.save(output_file)
     return output_file
 
@@ -23,7 +23,7 @@ def get_languages_and_voices(voices):
 def main():
     st.set_page_config(page_title="Voz-Neural", page_icon="🎙️")
     st.title("Voz-Neural: Conversor de Texto para Fala")
-    st.write("Digite um texto, ajuste a velocidade e entonação para gerar e ouvir o áudio em português (pt-BR) com a voz AntonioNeural.")
+    st.write("Digite um texto para gerar e ouvir o áudio em português (pt-BR) com a voz AntonioNeural.")
 
     # Carregar vozes disponíveis
     voices = asyncio.run(list_voices())
@@ -47,9 +47,6 @@ def main():
     selected_voice = 'pt-BR-AntonioNeural'
     st.write(f"Voz selecionada: pt-BR-AntonioNeural (Masculina)")
 
-    rate = st.slider("Velocidade da fala (%)", -50, 50, 0, help="Ajuste a velocidade: positivo para mais rápido, negativo para mais lento.")
-    pitch = st.slider("Entonação da fala (Hz)", -50, 50, 0, help="Ajuste o tom: positivo para mais agudo, negativo para mais grave.")
-    
     # Botão para gerar e tocar áudio
     output_file = "output.mp3"
     if st.button("Gerar e Tocar Áudio"):
@@ -57,11 +54,9 @@ def main():
             st.error("Por favor, insira um texto para converter.")
         else:
             with st.spinner("Gerando áudio..."):
-                rate_str = f"{rate:+d}%"
-                pitch_str = f"{pitch:+d}Hz"
                 try:
                     # Gerar o áudio
-                    audio_file = asyncio.run(generate_speech(text, selected_voice, output_file, rate_str, pitch_str))
+                    audio_file = asyncio.run(generate_speech(text, selected_voice, output_file))
                     st.success(f"Áudio gerado com sucesso: {audio_file}")
                     
                     # Tocar o áudio usando st.audio
