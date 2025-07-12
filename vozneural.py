@@ -23,29 +23,24 @@ def get_languages_and_voices(voices):
 def main():
     st.set_page_config(page_title="Voz-Neural", page_icon="🎙️")
     st.title("Voz-Neural: Conversor de Texto para Fala")
-    st.write("Digite um texto, ajuste a velocidade e entonação para gerar e ouvir o áudio em português (pt-BR) com a voz AntonioNeural.")
+    st.write("Digite um texto, selecione o idioma, a voz, ajuste a velocidade e entonação para gerar e ouvir o áudio.")
 
     # Carregar vozes disponíveis
     voices = asyncio.run(list_voices())
     languages, language_voice_map = get_languages_and_voices(voices)
 
-    # Verificar se pt-BR e pt-BR-AntonioNeural estão disponíveis
-    if 'pt-BR' not in languages:
-        st.error("Idioma pt-BR não disponível. Verifique a biblioteca edge-tts.")
-        return
-    if not any(voice['ShortName'] == 'pt-BR-AntonioNeural' for voice in language_voice_map['pt-BR']):
-        st.error("Voz pt-BR-AntonioNeural não disponível. Verifique a biblioteca edge-tts.")
-        return
-
     # Interface do Streamlit
     text = st.text_area("Texto para converter em fala", placeholder="Digite seu texto aqui...")
     
-    # Idioma fixo como pt-BR, com opção de mudar
+    # Seleção do idioma
     selected_language = st.selectbox("Selecione o idioma", languages, index=languages.index('pt-BR') if 'pt-BR' in languages else 0)
     
-    # Voz fixa como pt-BR-AntonioNeural
-    selected_voice = 'pt-BR-AntonioNeural'
-    st.write(f"Voz selecionada: pt-BR-AntonioNeural (Masculina)")
+    # Seleção da voz com base no idioma escolhido
+    voice_options = [f"{voice['ShortName']} ({voice['Gender']})" for voice in language_voice_map[selected_language]]
+    voice_short_names = [voice['ShortName'] for voice in language_voice_map[selected_language]]
+    default_voice_index = voice_short_names.index('pt-BR-AntonioNeural') if 'pt-BR-AntonioNeural' in voice_short_names else 0
+    selected_voice_display = st.selectbox("Selecione a voz", voice_options, index=default_voice_index)
+    selected_voice = voice_short_names[voice_options.index(selected_voice_display)]
 
     rate = st.slider("Velocidade da fala (%)", -50, 50, 0, help="Ajuste a velocidade: positivo para mais rápido, negativo para mais lento.")
     pitch = st.slider("Entonação da fala (Hz)", -50, 50, 0, help="Ajuste o tom: positivo para mais agudo, negativo para mais grave.")
