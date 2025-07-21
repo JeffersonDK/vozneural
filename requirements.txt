@@ -1,3 +1,4 @@
 streamlit
 edge-tts==6.1.7
 nest_asyncio
+pydub
